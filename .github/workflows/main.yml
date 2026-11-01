@@ -1,0 +1,25 @@
+name: Android build
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Обычная сборка
+        run: ./gradlew testDebugUnitTest assembleDebug
+      - run: cp app/build/outputs/apk/debug/app-debug.apk CarFiles-0.4.0-normal.apk
+      - name: Lab-сборка (экран на Android Auto)
+        run: ./gradlew -PprojectionLab=true assembleDebug
+      - run: cp app/build/outputs/apk/debug/app-debug.apk CarFiles-0.4.0-lab.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CarFiles-APK
+          path: CarFiles-0.4.0-*.apk
