@@ -2,6 +2,9 @@ name: Android build
 on: [push, workflow_dispatch]
 permissions:
   contents: read
+defaults:
+  run:
+    working-directory: CarFiles
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,12 +16,15 @@ jobs:
           java-version: '17'
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: CarFiles
+      - run: chmod +x gradlew
       - name: Обычная сборка
         run: ./gradlew testDebugUnitTest assembleDebug
-      - run: cp app/build/outputs/apk/debug/app-debug.apk CarFiles-0.4.0-normal.apk
-      - name: Lab-сборка (экран на Android Auto)
+      - run: cp app/build/outputs/apk/debug/app-debug.apk ../CarFiles-0.4.0-normal.apk
+      - name: Lab-сборка
         run: ./gradlew -PprojectionLab=true assembleDebug
-      - run: cp app/build/outputs/apk/debug/app-debug.apk CarFiles-0.4.0-lab.apk
+      - run: cp app/build/outputs/apk/debug/app-debug.apk ../CarFiles-0.4.0-lab.apk
       - uses: actions/upload-artifact@v4
         with:
           name: CarFiles-APK
