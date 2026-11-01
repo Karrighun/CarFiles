@@ -1,7 +1,7 @@
 name: Android build
 on: [push, workflow_dispatch]
 permissions:
-  contents: read
+  contents: write
 defaults:
   run:
     working-directory: CarFiles
@@ -31,3 +31,10 @@ jobs:
         with:
           name: CarFiles-APK
           path: CarFiles-0.4.0-*.apk
+      - name: Публикация в Releases
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete v0.4.0 --yes --cleanup-tag || true
+          gh release create v0.4.0 CarFiles-0.4.0-normal.apk CarFiles-0.4.0-lab.apk --title "CarFiles 0.4.0" --notes "Debug APK: normal (только аудио) и lab (экран на Android Auto)"
