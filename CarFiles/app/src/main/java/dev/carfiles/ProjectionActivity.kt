@@ -159,7 +159,7 @@ class ProjectionActivity : ComponentActivity() {
         val shown = carPrefs.getLong("car_last_frame", 0)
         fun stamp(v: Long) = DateFormat.getTimeInstance().format(Date(v))
         carLine.text = when {
-            created == 0L -> "Автомобильный экран ещё ни разу не запускался. Подключитесь к машине и откройте CarFiles Video Lab в списке приложений Android Auto. Подробности — в «Диагностике»."
+            created == 0L -> "Экран машины ещё не получал поверхность. В Android Auto откройте CarFiles среди навигационных приложений. Подробности — в «Диагностике»."
             shown == 0L || !running -> "Экран машины создан ${stamp(created)}. Кадры пока не показывались — запустите трансляцию."
             System.currentTimeMillis() - shown < 5000 -> "Машина получает кадры · последний ${stamp(shown)}"
             else -> "Машина не получает кадры с ${stamp(shown)}. Откройте раздел «Экран телефона» на автомобильном экране."

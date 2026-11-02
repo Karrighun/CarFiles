@@ -21,20 +21,17 @@ jobs:
         with:
           build-root-directory: CarFiles
       - run: chmod +x gradlew
-      - name: Обычная сборка
+      - name: Сборка и тесты
         run: ./gradlew testDebugUnitTest assembleDebug
-      - run: cp app/build/outputs/apk/debug/app-debug.apk ../CarFiles-0.4.0-normal.apk
-      - name: Lab-сборка
-        run: ./gradlew -PprojectionLab=true assembleDebug
-      - run: cp app/build/outputs/apk/debug/app-debug.apk ../CarFiles-0.4.0-lab.apk
+      - run: cp app/build/outputs/apk/debug/app-debug.apk ../CarFiles-0.5.0.apk
       - uses: actions/upload-artifact@v4
         with:
           name: CarFiles-APK
-          path: CarFiles-0.4.0-*.apk
+          path: CarFiles-0.5.0.apk
       - name: Публикация в Releases
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete v0.4.0 --yes --cleanup-tag || true
-          gh release create v0.4.0 CarFiles-0.4.0-normal.apk CarFiles-0.4.0-lab.apk --title "CarFiles 0.4.0" --notes "Debug APK: normal (только аудио) и lab (экран на Android Auto)"
+          gh release delete v0.5.0 --yes --cleanup-tag || true
+          gh release create v0.5.0 CarFiles-0.5.0.apk --title "CarFiles 0.5.0" --notes "Debug APK: вывод экрана через Car App Library"

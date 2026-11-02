@@ -1,1 +1,4 @@
-<automotiveApp><uses name="media" /></automotiveApp>
+<automotiveApp>
+    <uses name="media" />
+    <uses name="template" />
+</automotiveApp>

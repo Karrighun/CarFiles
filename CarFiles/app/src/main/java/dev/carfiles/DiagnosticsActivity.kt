@@ -30,7 +30,7 @@ class DiagnosticsActivity : ComponentActivity() {
         val created = prefs.getLong("projection_service_created", 0)
         val bound = prefs.getLong("projection_service_bound", 0)
         val screen = prefs.getLong("projection_screen_created", 0)
-        val lab = packageName.endsWith(".lab")
+        val lab = true
 
         content.card {
             addView(label("Телефон", 13f, Theme.muted))
@@ -43,14 +43,14 @@ class DiagnosticsActivity : ComponentActivity() {
         }
         content.card(if (screen != 0L) Theme.ok else Theme.warn) {
             addView(label("Путь до экрана машины", 13f, Theme.muted))
-            row("1. Сервис проекции создан", stamp(created), if (created != 0L) Theme.ok else Theme.warn)
-            row("2. Host подключился", stamp(bound), if (bound != 0L) Theme.ok else Theme.warn)
-            row("3. Экран машины создан", stamp(screen), if (screen != 0L) Theme.ok else Theme.warn)
+            row("1. Car App сервис создан", stamp(created), if (created != 0L) Theme.ok else Theme.warn)
+            row("2. Сессия Android Auto", stamp(bound), if (bound != 0L) Theme.ok else Theme.warn)
+            row("3. Поверхность экрана получена", stamp(screen), if (screen != 0L) Theme.ok else Theme.warn)
             gap(context, 8)
             addView(label(
                 if (!lab) "Установлена обычная сборка: в машине доступно только аудио. Для видео нужна сборка CarFiles Lab."
                 else if (screen != 0L) "Host Android Auto запускал наш экран. Если картинки нет — смотрите журнал ниже и раздел «Трансляция экрана»."
-                else if (bound != 0L) "Host подключался к сервису, но экран не открыл. Проверьте в Android Auto: Настройки → Версия → 10 нажатий → Режим разработчика → «Неизвестные источники»."
+                else if (bound != 0L) "Сессия открыта, но поверхность не выдана. Откройте CarFiles среди навигационных приложений на экране машины (иконка навигации)."
                 else "Host не обращался к сервису. Это значит, что Android Auto не показывает приложение: проверьте режим разработчика и «Неизвестные источники», затем переподключитесь к машине.", 13f, Theme.muted))
         }
         content.card {

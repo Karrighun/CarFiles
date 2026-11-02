@@ -1,5 +1,0 @@
-<automotiveApp xmlns:tools="http://schemas.android.com/tools">
-    <uses name="media" />
-    <uses name="service" tools:ignore="InvalidUsesTagAttribute" />
-    <uses name="projection" tools:ignore="InvalidUsesTagAttribute" />
-</automotiveApp>
