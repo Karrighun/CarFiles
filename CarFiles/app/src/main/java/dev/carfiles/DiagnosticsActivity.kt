@@ -27,10 +27,12 @@ class DiagnosticsActivity : ComponentActivity() {
         val installer = runCatching { packageManager.getInstallSourceInfo(packageName).installingPackageName }.getOrNull() ?: "APK / не указан"
         val aa = runCatching { packageManager.getPackageInfo("com.google.android.projection.gearhead", 0).versionName }.getOrNull()
         fun stamp(v: Long) = if (v == 0L) "ни разу" else DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(Date(v))
-        val created = prefs.getLong("projection_service_created", 0)
-        val bound = prefs.getLong("projection_service_bound", 0)
-        val screen = prefs.getLong("projection_screen_created", 0)
-        val lab = true
+        val created = prefs.getLong("car_service_created", 0)
+        val bound = prefs.getLong("car_session", 0)
+        val screen = prefs.getLong("car_surface", 0)
+        val lastFrame = prefs.getLong("car_last_frame", 0)
+        val trusted = installer == "com.android.vending"
+        val category = if (CarCategory.current(this) == CarCategory.NAVIGATION) "Навигация" else "Погода"
 
         content.card {
             addView(label("Телефон", 13f, Theme.muted))
@@ -38,20 +40,29 @@ class DiagnosticsActivity : ComponentActivity() {
             row("Модель", "${Build.MANUFACTURER} ${Build.MODEL}")
             row("Android Auto", aa ?: "не найден", if (aa == null) Theme.danger else Theme.text)
             row("Пакет", packageName)
-            row("Источник установки", installer)
-            row("Сборка с автоэкраном", if (lab) "да (Lab)" else "нет — только аудио", if (lab) Theme.ok else Theme.warn)
+            row("Источник установки", installer, if (trusted) Theme.ok else Theme.warn)
+            row("Категория в Android Auto", category)
         }
         content.card(if (screen != 0L) Theme.ok else Theme.warn) {
             addView(label("Путь до экрана машины", 13f, Theme.muted))
             row("1. Car App сервис создан", stamp(created), if (created != 0L) Theme.ok else Theme.warn)
             row("2. Сессия Android Auto", stamp(bound), if (bound != 0L) Theme.ok else Theme.warn)
             row("3. Поверхность экрана получена", stamp(screen), if (screen != 0L) Theme.ok else Theme.warn)
+            row("4. Последний кадр на машине", stamp(lastFrame), if (lastFrame != 0L) Theme.ok else Theme.warn)
             gap(context, 8)
             addView(label(
-                if (!lab) "Установлена обычная сборка: в машине доступно только аудио. Для видео нужна сборка CarFiles Lab."
-                else if (screen != 0L) "Host Android Auto запускал наш экран. Если картинки нет — смотрите журнал ниже и раздел «Трансляция экрана»."
-                else if (bound != 0L) "Сессия открыта, но поверхность не выдана. Откройте CarFiles среди навигационных приложений на экране машины (иконка навигации)."
-                else "Host не обращался к сервису. Это значит, что Android Auto не показывает приложение: проверьте режим разработчика и «Неизвестные источники», затем переподключитесь к машине.", 13f, Theme.muted))
+                if (created == 0L) "Android Auto ещё ни разу не обращался к сервису. Проверьте: режим разработчика → «Неизвестные источники», " +
+                    "«Настроить меню» → включить CarFiles Экран, затем переподключитесь к машине. " + (if (!trusted) "Приложение установлено не из Google Play — для приложений-шаблонов Android Auto может скрывать такие установки (см. ниже)." else "")
+                else if (bound == 0L) "Сервис создан, но сессия не открыта: откройте CarFiles Экран на экране машины."
+                else if (screen == 0L) "Сессия открыта, но поверхность не выдана. Смените категорию (Навигация ↔ Погода) в «Трансляции экрана» и переподключитесь."
+                else if (lastFrame == 0L) "Поверхность получена. Запустите трансляцию экрана на телефоне."
+                else "Кадры выводятся на экран машины.", 13f, Theme.muted))
+        }
+        if (!trusted) content.card(Theme.warn) {
+            addView(label("Источник установки", 13f, Theme.muted)); gap(context, 6)
+            addView(label("Некоторые версии Android Auto показывают приложения-шаблоны только если они установлены «из магазина». " +
+                "Если приложение не появляется в списке, переустановите APK с указанием источника (на компьютере с ADB): " +
+                "adb install -r -i com.android.vending CarFiles-0.5.0.apk", 13f, Theme.text).apply { setTextIsSelectable(true) })
         }
         content.card {
             addView(label("Журнал событий", 13f, Theme.muted)); gap(context, 8)

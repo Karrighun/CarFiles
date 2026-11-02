@@ -81,6 +81,27 @@ class ProjectionActivity : ComponentActivity() {
             card {
                 addView(label("Автомобильный экран", 13f, Theme.muted)); gap(context, 8)
                 carLine = label("", 14f, Theme.text).also { addView(it) }
+                gap(context, 14)
+                addView(label("Категория в Android Auto", 14f)); gap(context, 6)
+                val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+                val options = listOf(CarCategory.NAVIGATION to "Навигация", CarCategory.WEATHER to "Погода")
+                val tabs = mutableListOf<Pair<String, TextView>>()
+                fun paint() = tabs.forEach { (k, t) ->
+                    val on = k == CarCategory.current(this@ProjectionActivity)
+                    t.setTextColor(if (on) android.graphics.Color.WHITE else Theme.muted)
+                    t.background = context.rounded(if (on) Theme.accent else Theme.surfaceHi, 12, if (on) null else Theme.stroke)
+                }
+                options.forEach { (k, title) ->
+                    val t = context.label(title, 15f, Theme.muted, bold = true).apply {
+                        gravity = android.view.Gravity.CENTER; minHeight = context.dp(44)
+                        setOnClickListener { CarCategory.set(this@ProjectionActivity, k); paint()
+                            Toast.makeText(context, "Переподключитесь к машине, чтобы применить", Toast.LENGTH_LONG).show() }
+                    }
+                    tabs.add(k to t)
+                    row.addView(t, LinearLayout.LayoutParams(0, -2, 1f).apply { if (k != options.last().first) marginEnd = context.dp(8) })
+                }
+                paint(); addView(row); gap(context, 6)
+                addView(label("Навигация — основной вариант. Если карты заняты или экран не открывается, попробуйте «Погода» и переподключите телефон к машине.", 12f, Theme.muted))
             }
 
             previewCard = card {
@@ -155,7 +176,7 @@ class ProjectionActivity : ComponentActivity() {
             shownSeq = f.seq
             BitmapFactory.decodeByteArray(f.jpeg, 0, f.jpeg.size)?.let { preview.setImageBitmap(it) }
         }
-        val created = carPrefs.getLong("projection_screen_created", 0)
+        val created = carPrefs.getLong("car_surface", 0)
         val shown = carPrefs.getLong("car_last_frame", 0)
         fun stamp(v: Long) = DateFormat.getTimeInstance().format(Date(v))
         carLine.text = when {
@@ -166,6 +187,14 @@ class ProjectionActivity : ComponentActivity() {
         }
     }
 
-    override fun onStart() { super.onStart(); handler.post(refresh) }
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); autostartIfAsked() }
+    private fun autostartIfAsked() {
+        if (intent.getBooleanExtra(EXTRA_AUTOSTART, false) && !ProjectionState.running) {
+            intent.removeExtra(EXTRA_AUTOSTART); handler.post { onToggle() }
+        }
+    }
+    override fun onStart() { super.onStart(); handler.post(refresh); autostartIfAsked() }
+
+    companion object { const val EXTRA_AUTOSTART = "autostart" }
     override fun onStop() { handler.removeCallbacks(refresh); super.onStop() }
 }

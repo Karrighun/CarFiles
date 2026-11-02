@@ -82,6 +82,7 @@ class ProjectionService : Service() {
             projection = mp
             mp.registerCallback(callback, main)                 // обязательно до createVirtualDisplay (Android 14+)
             ProjectionState.reset()
+            CarConnectNotice.cancel(this)
             val srv = FrameServer().also { server = it }
             ProjectionState.addresses = srv.urls(); ProjectionState.address = srv.address()
             ProjectionState.startedAt = System.currentTimeMillis()

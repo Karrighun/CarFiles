@@ -8,7 +8,7 @@ android {
 }
 dependencies {
     implementation("androidx.activity:activity-ktx:1.10.1")
-    implementation("androidx.car.app:app:1.4.0")
+    implementation("androidx.car.app:app:1.7.0")
     implementation("androidx.lifecycle:lifecycle-common:2.8.7")
     implementation("androidx.media3:media3-exoplayer:1.6.1")
     implementation("androidx.media3:media3-session:1.6.1")

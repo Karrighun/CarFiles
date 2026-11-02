@@ -26,6 +26,12 @@ object CarLog {
         (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, "") ?: "")
             .lineSequence().filter { it.isNotBlank() }.toList().asReversed()
 
+    @JvmStatic fun mark(context: Context, key: String) {
+        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putLong(key, System.currentTimeMillis()).apply()
+    }
+    @JvmStatic fun time(context: Context, key: String): Long =
+        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getLong(key, 0L)
+
     @JvmStatic @Synchronized fun clear(context: Context) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(KEY).apply()
     }
